@@ -99,3 +99,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Dependency directories
+node_modules/
+jspm_packages/

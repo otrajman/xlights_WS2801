@@ -1,0 +1,13 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides: pi_shutdown
+# Required-Start: $remote_fs $syslog
+# Required-Stop: $remote_fs $syslog
+# Default-Start: S
+# Default-Stop:
+# Short-Description: Shutdown on GPIO trigger
+# Description: Python script listens for GPIO and runs shutdown command
+### END INIT INFO
+
+cd /home/dietpi/xlights_WS2801
+python lights.py www lights.json >> /var/log/xlights/`date +"%F"`.log  2>&1 &
