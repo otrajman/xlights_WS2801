@@ -3,14 +3,21 @@ Web GUI and Runtime to control a string of WS2801 lights.
 
 This group of scripts includes a configuration and Web UI to control a string of WS2801 lights.
 
-Start with lights.py, which runs CherryPy and controls the light script. 
+Start with lights.py, which runs CherryPy and controls the light script and sets the number of lights (75 here)
 
 The lights directory contains all the web files and scripts.
 
 The lights.json file contains the saved configuration.
 
 Check the paths in lights.rc (which you can configure to run at startup) and lights.conf
+------------------
+Pyton Dependencies:
 
+RPi.GPIO
+Adafruit_WS2801
+Adafruit_GPIO.SPI as SPI
+cherrypy
+json
 
 ------------------
 alternate.jpg  blink.jpg  cycle.jpg  rainbow.png  solid.jpg  trace.jpg
