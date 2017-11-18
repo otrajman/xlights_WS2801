@@ -1,12 +1,12 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides: pi_shutdown
+# Provides: lights
 # Required-Start: $remote_fs $syslog
 # Required-Stop: $remote_fs $syslog
 # Default-Start: S
 # Default-Stop:
-# Short-Description: Shutdown on GPIO trigger
-# Description: Python script listens for GPIO and runs shutdown command
+# Short-Description: Runs Webserver to Manager WS2801 Lights
+# Description: Runs Webserver to Manager WS2801 Lights
 ### END INIT INFO
 
 cd /home/dietpi/xlights_WS2801

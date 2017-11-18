@@ -10,6 +10,10 @@ The lights directory contains all the web files and scripts.
 The lights.json file contains the saved configuration.
 
 Check the paths in lights.rc (which you can configure to run at startup) and lights.conf
+
+To start on boot, check lights.rc, copy it to /etc/init.d/lights and run 
+# update-rc.d lights defaults
+
 ------------------
 Pyton Dependencies:
 
