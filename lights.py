@@ -4,6 +4,7 @@ import sys
 import os
 import pixels
 import time
+from cherrypy.process.plugins import Daemonizer
 from multiprocessing import Process, Pipe
 
 color_map = {
@@ -30,6 +31,8 @@ def solid(pixels, action):
   colors = [color_map[c] for c in action['colors']]
   color = pixels.color_step(colors[0], color_map['black'], 1 - float(action['brightness']))
   pixels.solid(color)
+  speed = int(action['speed'])
+  time.sleep(5/speed)
 
   #{"action":"trace","speed":"2","time":"1","reverse":0,"colors":["yellow"],"tail":"5"}
 def trace(pixels, action):
@@ -43,7 +46,7 @@ def blink(pixels, action):
   colors = [color_map[c] for c in action['colors']] + [color_map['black']] * int(action['alternate'])
   if int(action['reverse']): colors.reverse()
   pixels.alternating(colors)
-  time.sleep(0.5/speed)
+  time.sleep(1/speed)
   pixels.off()
   time.sleep(0.5/speed)
 
@@ -52,6 +55,8 @@ def alternate(pixels, action):
   colors = [color_map[c] for c in action['colors']]
   if int(action['reverse']): colors.reverse()
   pixels.alternating(colors)
+  speed = int(action['speed'])
+  time.sleep(5/speed)
 
   # {"action":"cycle","speed":"1","time":"1","reverse":0,"colors":["red","orange","yellow","green","blue","violet"],"brightness":"0.5"}
 def cycle(pixels, action):
@@ -82,7 +87,7 @@ def run_action(action, pipe):
     exit = 1
   p.off()
   del p
-  return 1
+  return exit
     
   #{"state":"0","start":"4","end":"10","actions":[]
 def run_actions(actions, pipe):
@@ -191,6 +196,9 @@ if __name__ == '__main__':
       
 
   if sys.argv[1] == 'www':
+    d = Daemonizer(cherrypy.engine)
+    d.subscribe()
+
     cherrypy.config.update("server.conf")
     cherrypy.quickstart(Lights(fj), '/', "lights.conf")
 
