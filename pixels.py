@@ -180,9 +180,9 @@ class Pixels():
             time.sleep(0.1 / speed)
         self.off()
 
-    def bounce(self, tail=1, color=(255,255,255), speed = 1):
-        self.trace(tail, direction = 0, color = color, speed = speed)
-        self.trace(tail, direction = 1, color = color, speed = speed)
+    def bounce(self, tail=1, start_dir = 0, color=(255,255,255), speed = 1):
+        self.trace(tail, start_dir, color = color, speed = speed)
+        self.trace(tail, (start_dir + 1) % 2, color = color, speed = speed)
 
     def alternating(self, color_set=[(255,255,255)]):
         self.pixels.clear()

@@ -18,7 +18,7 @@ var enableElements = function () {
   $('.preview.button').click(function() {
     value = this.closest('.action.item');
     action = saveAction(value);
-    $.post(`/preview`, {preview:JSON.stringify(action)}, function(data) {
+    $.post(`/preview`, {preview_action:JSON.stringify(action)}, function(data) {
     });  
   });
 
@@ -112,7 +112,7 @@ var newAction = function(action_type, action = null) {
     });
 
     /* rename color buttons */
-    $.each($(action_item).find(':input[name=color]'), function(i,r) {
+    $.each($(tag).find(':input[name=color]'), function(i,r) {
       r.name = `${r.name}_${name}`;
     });
 
@@ -121,18 +121,18 @@ var newAction = function(action_type, action = null) {
 
     /* update values */
     if(action !== null) {
-      $($(action_item).find(`:input[name=color_${name}]`)).addClass('basic');
+      $($(tag).find(`:input[name=color_${name}]`)).addClass('basic');
       $.each(action.colors, function(cindex, cvalue) {
-        $($(action_item).find(`.${cvalue}`)[0]).removeClass('basic')
+        $($(tag).find(`.${cvalue}`)[0]).removeClass('basic')
       });
 
-      setDropDownValue($(action_item).find(':input[name=speed]')[0], action.speed);
-      setDropDownValue($(action_item).find(':input[name=time]')[0], action.time);
+      setDropDownValue($(tag).find(':input[name=speed]')[0], action.speed);
+      setDropDownValue($(tag).find(':input[name=time]')[0], action.time);
 
       switch(action_type) {
         case 'rainbow':
         case 'alternate':
-          var reverse = $(action_item).find(':input[name=reverse]')[0]
+          var reverse = $(tag).find(':input[name=reverse]')[0]
           reverse.value = action.reverse;
           $(reverse).siblings(`button[data-value=${action.reverse}]`)
             .addClass('active')
@@ -141,13 +141,13 @@ var newAction = function(action_type, action = null) {
           break;
         case 'solid':
         case 'cycle':
-          $($(action_item).find(`:input[type=radio][name=brightness_${name}][value="${action.brightness}"]`)[0]).prop('checked', true);
+          $($(tag).find(`:input[type=radio][name=brightness_${name}][value="${action.brightness}"]`)[0]).prop('checked', true);
           break;
         case 'trace':
-          $($(action_item).find(`:input[type=radio][name=tail_${name}][value=${action.tail}]`)[0]).prop('checked', true);
+          $($(tag).find(`:input[type=radio][name=tail_${name}][value=${action.tail}]`)[0]).prop('checked', true);
           break;
         case 'blink':
-          $($(action_item).find(`:input[type=radio][name=density_${name}][value=${action.alternate}]`)[0]).prop('checked', true);
+          $($(tag).find(`:input[type=radio][name=density_${name}][value=${action.alternate}]`)[0]).prop('checked', true);
           break;
       }
     } 

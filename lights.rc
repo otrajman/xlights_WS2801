@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides: lights
+# Provides: xlights
 # Required-Start: $remote_fs $syslog
 # Required-Stop: $remote_fs $syslog
 # Default-Start: S
@@ -10,4 +10,4 @@
 ### END INIT INFO
 
 cd /home/dietpi/xlights_WS2801
-python lights.py www lights.json >> /var/log/xlights/`date +"%F"`.log  2>&1 &
+python lights.py daemon lights.json >> /var/log/xlights/`date +"%F"`.log  2>&1 &

@@ -20,6 +20,7 @@ color_map = {
 
   #{"action":"rainbow","speed":"1","time":"1","reverse":"0","colors":["red","orange","yellow","green","blue","violet"]}
 def rainbow(pixels, action):
+  print "Rainbow ", action
   speed = int(action['speed'])
   colors = [color_map[c] for c in action['colors']]
   if int(action['reverse']): colors.reverse()
@@ -28,38 +29,45 @@ def rainbow(pixels, action):
 
   #{"action":"solid","speed":"0","time":"1","reverse":0,"colors":["orange"],"brightness":"0.75"}
 def solid(pixels, action):
+  print "Solid ", action
   colors = [color_map[c] for c in action['colors']]
   color = pixels.color_step(colors[0], color_map['black'], 1 - float(action['brightness']))
   pixels.solid(color)
   speed = int(action['speed'])
+  if speed == 0: speed = 1
   time.sleep(5/speed)
 
   #{"action":"trace","speed":"2","time":"1","reverse":0,"colors":["yellow"],"tail":"5"}
 def trace(pixels, action):
+  print "Trace ", action
   colors = [color_map[c] for c in action['colors']]
-  #TODO: maybe bounce?
-  pixels.trace(int(action['tail']), int(action['reverse']), colors[0], int(action['speed']))
+  pixels.bounce(int(action['tail']), int(action['reverse']), colors[0], int(action['speed']))
 
   #{"action":"blink","speed":"1","time":"1","reverse":0,"colors":["violet"],"alternate":"1"}
 def blink(pixels, action):
+  print "Blink ", action
   speed = int(action['speed'])
   colors = [color_map[c] for c in action['colors']] + [color_map['black']] * int(action['alternate'])
   if int(action['reverse']): colors.reverse()
   pixels.alternating(colors)
+  if speed == 0: speed = 1
   time.sleep(1/speed)
   pixels.off()
   time.sleep(0.5/speed)
 
   #{"action":"alternate","speed":"0","time":"1","reverse":"1","colors":["white","red","green"]}
 def alternate(pixels, action):
+  print "Atlernate ", action
   colors = [color_map[c] for c in action['colors']]
   if int(action['reverse']): colors.reverse()
   pixels.alternating(colors)
   speed = int(action['speed'])
+  if speed == 0: speed = 1
   time.sleep(5/speed)
 
   # {"action":"cycle","speed":"1","time":"1","reverse":0,"colors":["red","orange","yellow","green","blue","violet"],"brightness":"0.5"}
 def cycle(pixels, action):
+  print "Cycle ", action
   speed = int(action['speed'])
   brightness = 1 - float(action['brightness'])
   colors = [pixels.color_step(color_map[c], color_map['black'], brightness) for c in action['colors']]
@@ -76,12 +84,14 @@ action_map = {
 }
 
 def run_action(action, pipe):
+  print "Running ", action 
   exit = 0
   p = pixels.Pixels()
   end = time.time() + float(action['time']) * 60
   infinite = float(action['time']) == 0
-  while pipe.poll() == 0 and (infinite or time.time() < end):
+  while infinite or time.time() < end:
     action_map[action['action']](p, action)
+    if pipe.poll(): break
   if pipe.poll(): 
     pipe.recv()
     exit = 1
@@ -143,7 +153,8 @@ class Lights(object):
   def start(self):
     if self.proc is None:
       print "Starting..."
-      self.proc = Process(target = run_actions, args=(self.actions, self.run_pipe)).start()
+      self.proc = Process(target = run_actions, args=(self.actions, self.run_pipe))
+      self.proc.start()
     return {"state":"1"}
 
   @cherrypy.expose
@@ -156,20 +167,22 @@ class Lights(object):
     return {"state":"0"}
 
   @cherrypy.expose
-  def preview(self, preview=None):
+  def preview(self, preview_action=None):
     self.stop()
-    if preview:
-      action = json.loads(preview)
+    if preview_action:
+      action = json.loads(preview_action)
       action['time'] = "0.15"
       print "Preview ", action
       #simple sanity check
       if len(action['colors']) > 0:
-        p = Process(target = run_action, args=(action, self.run_pipe)).start()
+        p = Process(target = run_action, args=(action, self.run_pipe))
+        p.start()
         self.stop_pipe.send(['STOP'])
         p.join()
     else:
       for action in self.actions:
-        p = Process(target = run_action, args=(action, self.run_pipe)).start()
+        p = Process(target = run_action, args=(action, self.run_pipe))
+        p.start()
         self.stop_pipe.send(['STOP'])
         p.join()
     self.start()
@@ -195,10 +208,14 @@ if __name__ == '__main__':
       fj = open(fj, 'r+')
       
 
-  if sys.argv[1] == 'www':
+  if sys.argv[1] == 'daemon':
     d = Daemonizer(cherrypy.engine)
     d.subscribe()
 
+    cherrypy.config.update("server.conf")
+    cherrypy.quickstart(Lights(fj), '/', "lights.conf")
+
+  if sys.argv[1] == 'www':
     cherrypy.config.update("server.conf")
     cherrypy.quickstart(Lights(fj), '/', "lights.conf")
 
