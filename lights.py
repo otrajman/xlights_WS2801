@@ -106,7 +106,7 @@ def run_actions(actions, pipe):
   exit = 0
   aindex = 0
   alen = len(actions['actions'])
-  while exit == 0 and start <= time.localtime().tm_hour <= end:
+  while exit == 0 and start <= time.localtime().tm_hour < end:
     action = actions['actions'][aindex] 
     exit = run_action(action, pipe)
     aindex = (aindex + 1) % alen
