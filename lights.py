@@ -106,10 +106,16 @@ def run_actions(actions, pipe):
   exit = 0
   aindex = 0
   alen = len(actions['actions'])
-  while exit == 0 and start <= time.localtime().tm_hour < end:
-    action = actions['actions'][aindex] 
-    exit = run_action(action, pipe)
-    aindex = (aindex + 1) % alen
+  while exit == 0:
+    if start <= time.localtime().tm_hour < end:
+      action = actions['actions'][aindex] 
+      exit = run_action(action, pipe)
+      aindex = (aindex + 1) % alen
+    else: 
+      time.sleep(1)
+      if pipe.poll(): 
+        pipe.recv()
+        exit = 1
   return exit
 
 class Lights(object):
