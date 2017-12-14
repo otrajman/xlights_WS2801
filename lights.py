@@ -157,10 +157,10 @@ class Lights(object):
 
   @cherrypy.expose
   def start(self):
-    if self.proc is None:
-      print "Starting..."
-      self.proc = Process(target = run_actions, args=(self.actions, self.run_pipe))
-      self.proc.start()
+    self.stop()
+    print "Starting..."
+    self.proc = Process(target = run_actions, args=(self.actions, self.run_pipe))
+    self.proc.start()
     return {"state":"1"}
 
   @cherrypy.expose
