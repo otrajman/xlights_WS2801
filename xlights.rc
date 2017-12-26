@@ -1,28 +1,42 @@
 #! /bin/sh
-
+# Start/stop xlights
+#
 ### BEGIN INIT INFO
-# Provides: xlights
-# Required-Start: $remote_fs $syslog
-# Required-Stop: $remote_fs $syslog
-# Default-Start: S
+# Provides:          xlights
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     S
 # Default-Stop:
 # Short-Description: Runs Webserver to Manager WS2801 Lights
-# Description: Runs Webserver to Manager WS2801 Lights
+# Description:       Runs Webserver to Manager WS2801 Lights
 ### END INIT INFO
 
-cd /home/dietpi/xlights_WS2801
+DESC="xlights daemon"
+NAME=xlights
+DIR=/home/dietpi/xlights_WS2801
+SCRIPT=$DIR/lights.py
+PATH=$PATH:$DIR
+
+. /lib/lsb/init-functions
 
 case "$1" in
-  start|restart|force-reload)
-    sudo kill -9 $(ps aux | grep lights.py | grep -v grep | awk '{print $2}')
-    python off.py
-    python lights.py daemon lights.json >> /var/log/xlights/`date +"%F"`.log  2>&1 &
-    ;;
-  stop)
-    sudo kill -9 $(ps aux | grep lights.py | grep -v grep | awk '{print $2}')
-    python off.py
-    ;;
-  status)
-    ps aux | grep lights.py | grep -v grep | awk '{print $2}'
-    ;;
+start)   log_daemon_msg "Starting xlights"
+         cd $DIR
+         python $SCRIPT www lights.json >> /var/log/xlights/`date +"%F"`.log  2>&1 &
+         log_daemon_msg "xlights started"
+         ;;
+stop)    log_daemon_msg "Stopping stragglers..."
+         sudo kill -9 $(ps aux | grep lights.py | grep -v grep | awk '{print $2}')
+         log_daemon_msg "Turning off lights"
+         python off.py
+         ;;
+restart)
+         $0 stop
+         $0 start
+         ;;
+status)
+         log_daemon_msg "Stopping stragglers..."
+         ps aux | grep lights.py | grep -v grep | awk '{print $2}'
+         ;;
 esac
+exit 0

@@ -95,7 +95,7 @@ def run_action(action, pipe):
   if pipe.poll(): 
     pipe.recv()
     exit = 1
-  p.off()
+  p.brightness_decrease(step = 10)
   del p
   return exit
     
@@ -142,6 +142,9 @@ class Lights(object):
     if start <= time.localtime().tm_hour <= end: state = 1
     self.actions['state'] = state
     if state: self.start() 
+
+  def __del__(self):
+    self.stop()
  
   @cherrypy.expose
   def lights(self, save=None):
@@ -153,6 +156,7 @@ class Lights(object):
         self.file.truncate(0)
         self.file.write(save)
         self.file.flush()
+      self.start()
     return json.dumps(self.actions)
 
   @cherrypy.expose

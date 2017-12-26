@@ -1,2 +1,2 @@
 import pixels
-pixels.Pixels().off()
+pixels.Pixels().brightness_decrease(step = 10)

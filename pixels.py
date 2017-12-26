@@ -106,6 +106,7 @@ class Pixels():
             self.pixels.show()
             if wait > 0:
                 time.sleep(wait)
+        self.off()
 
     def brightness_increase(self, wait=0.01, step=1):
         for j in range(int(256 // step)):
