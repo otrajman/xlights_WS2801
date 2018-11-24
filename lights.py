@@ -7,6 +7,19 @@ import time
 from cherrypy.process.plugins import Daemonizer
 from multiprocessing import Process, Pipe
 
+import RPi.GPIO as GPIO
+ON_PIN = 22
+ 
+GPIO.setmode(pixels.GPIO.BCM)
+GPIO.setup(ON_PIN, pixels.GPIO.OUT)
+
+def on():
+  GPIO.output(ON_PIN, 1)
+
+def off():
+  GPIO.output(22, 0)
+
+
 color_map = {
   'white':pixels.WHITE,
   'black':pixels.BLACK,
@@ -136,16 +149,19 @@ class Lights(object):
         start = int(self.actions['start'])
         end = int(self.actions['end'])
         print "Loaded ", self.actions
-    
+   
+    print 'FJ', fj 
     if isinstance(fj, dict): self.actions = fj
 
     if start <= time.localtime().tm_hour <= end: state = 1
     self.actions['state'] = state
     if state: self.start() 
+    on()
 
   def __del__(self):
     self.stop()
- 
+    off()
+
   @cherrypy.expose
   def lights(self, save=None):
     if save:
@@ -203,12 +219,13 @@ class Lights(object):
 
 def help(name):
   print "name [www|test|preview|run] [file|json]"
+
 if __name__ == '__main__':
   if len(sys.argv) < 2: 
     help(sys.argv[0])
     sys.exit(0)
 
-  fj = {}
+  fj = None
 
   if len(sys.argv) > 2:
     fj = sys.argv[2]
