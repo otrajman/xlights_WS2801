@@ -1,0 +1,62 @@
+#! /bin/sh
+# Start/stop xlights
+#
+exec 1<&-
+exec 2<&-
+LOG_FILE=/home/dietpi/xlights.log
+exec 1<>$LOG_FILE
+exec 2>&1
+set -x
+#
+### BEGIN INIT INFO
+# Provides:          xlights
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     S 2 3 4 5 
+# Default-Stop:      0 1 6
+# Short-Description: Runs Webserver to Manager WS2801 Lights
+# Description:       Runs Webserver to Manager WS2801 Lights
+### END INIT INFO
+
+DESC="xlights daemon"
+NAME=xlights
+DIR=/home/dietpi/xlights_WS2801
+SCRIPT=$DIR/lights.py
+CONFIG=$DIR/lights.json
+PATH=$PATH:$DIR
+PIDFILE=$DIR/xlights.pid
+LOGFILE=/var/log/xlights/`date +"%F"`.log 
+
+#. /lib/lsb/init-functions
+
+#echo $1
+#echo `ls $DIR`
+#echo `ls $SCRIPT`
+#echo `ls $CONFIG`
+
+case "$1" in
+  start)
+	echo "Starting xlights"
+	cd $DIR
+	su dietpi -c "$SCRIPT www $CONFIG >> $LOGFILE 2>&1 &"
+	echo "xlights started"
+	;;
+  stop)
+	echo "Stopping stragglers..."
+	kill -9 $(ps aux | grep lights.py | grep -v grep | awk '{print $2}')
+	echo "Turning off lights"
+	python off.py
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  status)
+	echo "xlights status"
+	ps aux | grep lights.py | grep -v grep | awk '{print $2}'
+	;;
+  *)       
+	echo "Usage: $0 [start|stop|restart|status]"
+	;;
+esac
+exit 0

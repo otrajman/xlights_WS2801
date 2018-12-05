@@ -11,8 +11,8 @@ The lights.json file contains the saved configuration.
 
 Check the paths in lights.rc (which you can configure to run at startup) and lights.conf
 
-To start on boot, check lights.rc, copy it to /etc/init.d/xlights and run 
-# update-rc.d xlights defaults
+To start on boot, copy xlights.service to /lib/systemd/system as root and run 
+# systemctl enable xlights
 
 ------------------
 Pyton Dependencies:

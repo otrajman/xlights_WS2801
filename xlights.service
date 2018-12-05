@@ -1,0 +1,10 @@
+[Unit]
+Description=XLights WS2801
+
+[Service]
+Type=forking
+ExecStart=/home/dietpi/xlights_WS2801/xlights_start.sh
+ExecStop=/home/dietpi/xlights_WS2801/xlights_stop.sh
+
+[Install]
+Alias=xlights.service
