@@ -151,12 +151,12 @@ class Lights(object):
         end = int(self.actions['end'])
         print "Loaded ", self.actions
    
-    print 'FJ', fj 
     if isinstance(fj, dict): self.actions = fj
 
     if start <= time.localtime().tm_hour <= end: state = 1
     self.actions['state'] = state
-    if state: self.start() 
+    #if state: 
+    self.start() 
     on()
 
   def __del__(self):
