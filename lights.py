@@ -20,6 +20,11 @@ def on():
 def off():
   GPIO.output(22, 0)
 
+def dim():
+  p = pixels.Pixels()
+  p.brightness_decrease(step = 10)
+  del p
+  
 
 color_map = {
   'white':pixels.WHITE,
@@ -34,7 +39,7 @@ color_map = {
 
   #{"action":"rainbow","speed":"1","time":"1","reverse":"0","colors":["red","orange","yellow","green","blue","violet"]}
 def rainbow(pixels, action):
-  print "Rainbow ", action
+  # print "Rainbow ", action
   speed = int(action['speed'])
   colors = [color_map[c] for c in action['colors']]
   if int(action['reverse']): colors.reverse()
@@ -43,7 +48,7 @@ def rainbow(pixels, action):
 
   #{"action":"solid","speed":"0","time":"1","reverse":0,"colors":["orange"],"brightness":"0.75"}
 def solid(pixels, action):
-  print "Solid ", action
+  # print "Solid ", action
   colors = [color_map[c] for c in action['colors']]
   color = pixels.color_step(colors[0], color_map['black'], 1 - float(action['brightness']))
   pixels.solid(color)
@@ -53,13 +58,13 @@ def solid(pixels, action):
 
   #{"action":"trace","speed":"2","time":"1","reverse":0,"colors":["yellow"],"tail":"5"}
 def trace(pixels, action):
-  print "Trace ", action
+  # print "Trace ", action
   colors = [color_map[c] for c in action['colors']]
   pixels.bounce(int(action['tail']), int(action['reverse']), colors[0], int(action['speed']))
 
   #{"action":"blink","speed":"1","time":"1","reverse":0,"colors":["violet"],"alternate":"1"}
 def blink(pixels, action):
-  print "Blink ", action
+  # print "Blink ", action
   speed = int(action['speed'])
   colors = [color_map[c] for c in action['colors']] + [color_map['black']] * int(action['alternate'])
   if int(action['reverse']): colors.reverse()
@@ -71,7 +76,7 @@ def blink(pixels, action):
 
   #{"action":"alternate","speed":"0","time":"1","reverse":"1","colors":["white","red","green"]}
 def alternate(pixels, action):
-  print "Atlernate ", action
+  # print "Atlernate ", action
   colors = [color_map[c] for c in action['colors']]
   if int(action['reverse']): colors.reverse()
   pixels.alternating(colors)
@@ -81,7 +86,7 @@ def alternate(pixels, action):
 
   # {"action":"cycle","speed":"1","time":"1","reverse":0,"colors":["red","orange","yellow","green","blue","violet"],"brightness":"0.5"}
 def cycle(pixels, action):
-  print "Cycle ", action
+  # print "Cycle ", action
   speed = int(action['speed'])
   brightness = 1 - float(action['brightness'])
   colors = [pixels.color_step(color_map[c], color_map['black'], brightness) for c in action['colors']]
@@ -109,7 +114,6 @@ def run_action(action, pipe):
   if pipe.poll(): 
     pipe.recv()
     exit = 1
-  p.brightness_decrease(step = 10)
   del p
   return exit
     
@@ -121,6 +125,7 @@ def run_actions(actions, pipe):
   aindex = 0
   alen = len(actions['actions'])
   while exit == 0:
+    print "Start", start, "End", end, "Local", time.localtime().tm_hour, "Index", aindex
     if start <= time.localtime().tm_hour < end:
       action = actions['actions'][aindex] 
       exit = run_action(action, pipe)
@@ -128,8 +133,10 @@ def run_actions(actions, pipe):
     else: 
       time.sleep(1)
       if pipe.poll(): 
+        print 'Stop'
         pipe.recv()
         exit = 1
+  dim()
   return exit
 
 class Lights(object):
@@ -155,13 +162,19 @@ class Lights(object):
 
     if start <= time.localtime().tm_hour <= end: state = 1
     self.actions['state'] = state
-    #if state: 
     self.start() 
     on()
 
   def __del__(self):
+    print 'Stopping'
     self.stop()
     off()
+
+  @cherrypy.expose
+  def check(self):
+    if start <= time.localtime().tm_hour <= end: state = 1
+    self.actions['state'] = state
+    self.start() 
 
   @cherrypy.expose
   def lights(self, save=None):
@@ -206,12 +219,14 @@ class Lights(object):
         p.start()
         self.stop_pipe.send(['STOP'])
         p.join()
+        dim()
     else:
       for action in self.actions:
         p = Process(target = run_action, args=(action, self.run_pipe))
         p.start()
         self.stop_pipe.send(['STOP'])
         p.join()
+	dim()
     self.start()
 
   def test(self):
