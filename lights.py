@@ -129,8 +129,11 @@ def run_actions(actions, pipe):
     if start <= time.localtime().tm_hour < end:
       action = actions['actions'][aindex] 
       exit = run_action(action, pipe)
-      aindex = (aindex + 1) % alen
+      nindex = (aindex + 1) % alen
+      if nindex != aindex: dim()
+      aindex = nindex
     else: 
+      dim()
       time.sleep(1)
       if pipe.poll(): 
         print 'Stop'
